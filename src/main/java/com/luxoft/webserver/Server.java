@@ -1,34 +1,45 @@
 package com.luxoft.webserver;
 
+import com.luxoft.webserver.request.RequestHandler;
+
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 
 public class Server {
+    private static int port ;
+    private String webAppPath;
 
-    public static void main(String[] args) throws Exception {
-        try (ServerSocket serverSocket = new ServerSocket(3000);
-            Socket socket = serverSocket.accept();
-            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
-        ) {
-            while (true) {
-                String messageFromClient = bufferedReader.readLine();
-                System.out.println(messageFromClient);
-                //parse message
-                if (messageFromClient.equals("")) {
-                    break;
-                }
+    public void start() throws Exception{
+        while (true) {
+            try (ServerSocket serverSocket = new ServerSocket(port);
+                 Socket socket = serverSocket.accept();
+                 BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+                 BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
+            ) {
+                RequestHandler requestHandler = new RequestHandler(bufferedReader, bufferedWriter);
+                requestHandler.setWebAppPath(webAppPath);
+                requestHandler.handle();
+
             }
-
-
-            System.out.println("Request obtained");
-            //answer
-            bufferedWriter.write("HTTP/1.1 200 OK");
-            bufferedWriter.newLine();
-            bufferedWriter.newLine();
-            bufferedWriter.write("Hello Chrome!");
         }
-
     }
+
+    public int getPort() {
+        return port;
+    }
+
+    public void setPort(int port) {
+        this.port = port;
+    }
+
+    public String getWebAppPath() {
+        return webAppPath;
+    }
+
+    public void serWebAppPath(String webAppServer) {
+        this.webAppPath = webAppServer;
+    }
+
+
 }
